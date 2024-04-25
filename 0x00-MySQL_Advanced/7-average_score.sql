@@ -1,3 +1,5 @@
+-- Average score 
+-- SQL script that creates a stored procedure
 DELIMITER //
 
 CREATE PROCEDURE ComputeAverageScoreForUser(IN user_id INT)
