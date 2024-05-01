@@ -2,8 +2,7 @@
 """A script to  Writing strings to Redis"""
 import redis
 from uuid import uuid4
-from typing import Union
-
+from typing import Union, Callable
 
 class Cache:
     """A class for storing data in Redis with randomly generated keys"""
@@ -17,3 +16,22 @@ class Cache:
         key = str(uuid4())
         self._redis.set(key, data)
         return key
+
+    def get(self, key: str, fn: Callable = None) -> Union[str, bytes, int, float]:
+        """Convert data back to desired format"""
+        value = self._redis.get(key)
+        if fn:
+            value = fn(value)
+        return value
+    
+    def get_str(self, key: str) -> str:
+        """Retrieve string data from Redis"""
+        value = self._redis.get(key)
+        return value.decode("utf-8")
+
+    def get_int(self, key: str) -> int:
+        """Retrieve integer data from Redis"""
+        value = self._redis.get(key)
+        if value is not None:
+            return int(value.decode("utf-8"))
+        return None
