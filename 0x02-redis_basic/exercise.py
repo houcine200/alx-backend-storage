@@ -3,6 +3,19 @@
 import redis
 from uuid import uuid4
 from typing import Union, Callable
+from functools import wraps
+
+def count_calls(method: Callable) -> Callable:
+    """Decorator to count how many times a method is called."""
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        """wrapper for decorated function"""
+        key = method.__qualname__
+        self._redis.incr(key)
+        return method(self, *args, **kwargs)
+    
+    return wrapper
+
 
 class Cache:
     """A class for storing data in Redis with randomly generated keys"""
