@@ -2,7 +2,7 @@
 """A script to  Writing strings to Redis"""
 import redis
 from uuid import uuid4
-from typing import Union, Callable
+from typing import Union, Callable, Any
 from functools import wraps
 
 
@@ -18,6 +18,20 @@ def count_calls(method: Callable) -> Callable:
     return wrapper
 
 
+def call_history(method: Callable) -> Callable:
+    """Decorator to store the history of inputs and outputs for a function."""
+    @wraps(method)
+    def wrapper(self: Any, *args) -> str:
+        """Wraps called method and tracks
+        its passed arguments by storing them in Redis"""
+        self._redis.rpush(f'{method.__qualname__}:inputs', str(args))
+        output = method(self, *args)
+        self._redis.rpush(f'{method.__qualname__}:outputs', output)
+        return output
+
+    return wrapper
+
+
 class Cache:
     """A class for storing data in Redis with randomly generated keys"""
 
@@ -27,6 +41,7 @@ class Cache:
         self._redis.flushdb()
 
     @count_calls
+    @call_history
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """Store data in Redis using randomly generated key and return it"""
         key = str(uuid4())
