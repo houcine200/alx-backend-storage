@@ -20,13 +20,16 @@ def url_access_count(method):
             return cached_value.decode("utf-8")
 
         key_count = "count:" + url
+        access_count = r.get(key_count)
+        if not access_count:
+            r.set(key_count, 1)
+        else:
+            r.incr(key_count)
         html_content = method(url)
 
-        r.incr(key_count)
         r.set(key, html_content, ex=10)
         r.expire(key, 10)
         return html_content
-    return wrapper
 
 
 @url_access_count
