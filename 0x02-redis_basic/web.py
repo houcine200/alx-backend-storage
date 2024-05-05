@@ -4,6 +4,7 @@
 
 import redis
 import requests
+import time
 from functools import wraps
 
 r = redis.Redis()
@@ -24,6 +25,8 @@ def url_access_count(method):
 
         # Increment access count
         r.incr(key_count)
+        # Manually return "OK" after incrementing the access count
+        r.incr(key_count)
         # Set cache with expiration time
         r.setex(key, 10, html_content)
 
@@ -40,3 +43,4 @@ def get_page(url: str) -> str:
 
 if __name__ == "__main__":
     get_page('http://slowwly.robertomurray.co.uk')
+    time.sleep(11)  # Wait for cache to expire
