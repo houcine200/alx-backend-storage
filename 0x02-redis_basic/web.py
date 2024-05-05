@@ -22,9 +22,11 @@ def url_access_count(method):
         key_count = "count:" + url
         html_content = method(url)
 
+        # Increment access count
         r.incr(key_count)
-        r.set(key, html_content, ex=10)
-        r.expire(key, 10)
+        # Set cache with expiration time
+        r.setex(key, 10, html_content)
+
         return html_content
     return wrapper
 
